@@ -2,9 +2,7 @@ package ru.qa.wiremock;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 import org.hamcrest.Matchers;
 
 import java.util.Random;
@@ -21,7 +19,7 @@ public class WireMockTest {
     private WireMockServer mockServer;
     private byte a, b;
 
-    @BeforeMethod
+    @BeforeClass
     public void startMockServer(){
         final int PORT = 8090;
         mockServer = new WireMockServer(
@@ -30,6 +28,7 @@ public class WireMockTest {
         );
         mockServer.start();
         WireMock.configureFor("localhost", PORT);
+        this.setUpStub();
     }
 
     @BeforeMethod
@@ -39,8 +38,7 @@ public class WireMockTest {
     }
 
     @Test
-    public void testWireMock(){
-        this.setUpStub();
+    public void testPlus(){
         given().when()
                 .queryParam("operation", "plus")
                 .queryParam("left", a)
@@ -52,7 +50,20 @@ public class WireMockTest {
                 .assertThat().body(Matchers.equalTo(String.valueOf(a + b)));
     }
 
-    @AfterMethod(alwaysRun = true)
+    @Test
+    public void testMinus(){
+        given().when()
+                .queryParam("operation", "minus")
+                .queryParam("left", a)
+                .queryParam("right", b)
+                .get("http://localhost:8090/calculator")
+                .then()
+                .log().all()
+                .assertThat().statusCode(SC_OK)
+                .assertThat().body(Matchers.equalTo(String.valueOf(a - b)));
+    }
+
+    @AfterClass(alwaysRun = true)
     public void stopMockServer(){
         mockServer.stop();
     }

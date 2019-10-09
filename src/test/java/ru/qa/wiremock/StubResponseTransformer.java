@@ -10,14 +10,19 @@ public class StubResponseTransformer extends ResponseTransformer {
 
     @Override
     public Response transform(Request req, Response res, FileSource files, Parameters parameters) {
-        if (req.queryParameter("operation").isPresent() && req.getUrl().contains("plus")) {
-            int left = Integer.parseInt(req.queryParameter("left").firstValue());
-            int right = Integer.parseInt(req.queryParameter("right").firstValue());
-            return Response.Builder.like(res).but()
-                    .body(String.valueOf(left + right))
-                    .build();
+        int result = 0;
+        int left = Integer.parseInt(req.queryParameter("left").firstValue());
+        int right = Integer.parseInt(req.queryParameter("right").firstValue());
+
+        if (req.getUrl().contains("plus")){
+            result = left + right;
+        } else if (req.getUrl().contains("minus")){
+            result = left - right;
         }
-        return res;
+
+        return Response.Builder.like(res).but()
+                .body(String.valueOf(result))
+                .build();
     }
 
     @Override
